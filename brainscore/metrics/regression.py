@@ -192,7 +192,6 @@ class GramControlPLS():
         self.gram_control = gram_control
         self.channel_coord = channel_coord
         self.regression_kwargs = regression_kwargs or {}
-        self.control_regression = PLSRegression(**self.regression_kwargs)
         self.main_regression = PLSRegression(**self.regression_kwargs)
 
     def _unflatten(self, X, channel_coord=None):
@@ -241,7 +240,7 @@ class GramControlPLS():
 
         return X
 
-    def _preprocess_gram(self, X, fit=True):
+    def _compute_gram(self, X):
 
         # Compute gram matrices
         X_grams = self._unflatten(X, self.channel_coord) # Unflatten X to BxCxH*W (or W*H, not sure)
@@ -249,21 +248,12 @@ class GramControlPLS():
         #X_grams = X_grams/X.size # is this the right normalization?
         X_grams = X_grams.reshape(X_grams.shape[0], -1)
 
-        # Residuals
-        if fit:
-            self.control_regression.fit(X_grams, X)
-        X = X - self.control_regression.predict(X_grams)
-
-        return X
-
-    def _preprocess(self, X, fit=True):
-        # I think all the preprocessing needed happens inside PLS?
-        return X
-
+        return X_grams
 
     def fit(self, X, Y):
         if self.gram_control:
-            X = self._preprocess_gram(X, fit=True)
+            X_grams = self._compute_gram(X)
+            #concatenate
         else:
             X = self._preprocess(X, fit=True)
 
