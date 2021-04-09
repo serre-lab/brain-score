@@ -41,7 +41,7 @@ setup(
     long_description=readme,
     author="Brain-Score Team",
     author_email='mschrimpf@mit.edu, jjpr@mit.edu',
-    url='https://github.com/brain-score/brain-score',
+    url='https://https://github.com/serre-lab/brain-score',
     packages=find_packages(exclude=['tests']),
     include_package_data=True,
     install_requires=requirements,
