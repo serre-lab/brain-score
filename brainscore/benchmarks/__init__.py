@@ -144,7 +144,9 @@ def _evaluation_benchmark_pool():
     
     from .majajhong2015_combined import DicarloMajajHong2015V4PLS_combined, DicarloMajajHong2015ITPLS_combined,DicarloMajajHong2015ITPLS_combined_split
     from .majajhong2015_combined import DicarloMajajHong2015ITPLS_combined_split_ty_01_neg, DicarloMajajHong2015ITPLS_combined_split_ty_01_pos
-    from .majajhong2015_combined import DicarloMajajHong2015ITPLS_combined_split_tz_01_neg, DicarloMajajHong2015ITPLS_combined_split_tz_01_pos
+    from .majajhong2015_combined import DicarloMajajHong2015ITPLS_combined_split_tz_01_neg, DicarloMajajHong2015ITPLS_combined_split_tz_01_pos, DicarloMajajHong2015ITPLS_combined_tossed_ty, DicarloMajajHong2015ITPLS_combined_tossed_tz
+    pool['dicarlo.MajajHong2015.IT-pls_combined_tossed_ty'] = LazyLoad(DicarloMajajHong2015ITPLS_combined_tossed_ty)
+    pool['dicarlo.MajajHong2015.IT-pls_combined_tossed_tz'] = LazyLoad(DicarloMajajHong2015ITPLS_combined_tossed_tz)
     pool['dicarlo.MajajHong2015.V4-pls_combined'] = LazyLoad(DicarloMajajHong2015V4PLS_combined)
     pool['dicarlo.MajajHong2015.IT-pls_combined'] = LazyLoad(DicarloMajajHong2015ITPLS_combined)
     pool['dicarlo.MajajHong2015.IT-pls_combined_split'] = LazyLoad(DicarloMajajHong2015ITPLS_combined_split)

@@ -7,7 +7,7 @@ from brainscore.metrics.transformations import TestOnlyCrossValidation
 class CrossCorrelation:
     def __init__(self, stimulus_coord=XarrayDefaults.stimulus_coord, neuroid_coord=XarrayDefaults.neuroid_coord,
                  neuroid_dim=XarrayDefaults.neuroid_dim,
-                 test_size=.8, splits=5):
+                 test_size=.5, splits=10):
         self._correlation = XarrayCorrelation(pearsonr, correlation_coord=stimulus_coord, neuroid_coord=neuroid_coord)
         self._cross_validation = TestOnlyCrossValidation(test_size=test_size, splits=splits)
         self._neuroid_dim = neuroid_dim

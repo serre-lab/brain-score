@@ -167,7 +167,8 @@ class CartesianProduct(Transformation):
 class Split:
     class Defaults:
         splits = 10
-        train_size = .9
+        train_size = .5
+        test_size = 0.5
         split_coord = 'image_id'
         stratification_coord = 'object_name'  # cross-validation across images, balancing objects
         unique_split_values = False
@@ -207,6 +208,7 @@ class Split:
 
     def build_splits(self, assembly):
         cross_validation_values, indices = extract_coord(assembly, self._split_coord, unique=self._unique_split_values)
+        
         data_shape = np.zeros(len(cross_validation_values))
         args = [assembly[self._stratification_coord].values[indices]] if self.do_stratify else []
         splits = self._split.split(data_shape, *args)
@@ -307,6 +309,24 @@ class CrossValidation(Transformation):
         #argument to provide csv files with the indexes needed
         self._given_indices_parent_folder = kwargs.get('parent_folder',None)
         self._given_indices_file = kwargs.get('csv_file',None)
+        self._one_given_file = kwargs.get('one_given_file',False)
+        
+    def _build_splits_one_file(self,cross_validation_values,n_splits = Split.Defaults.splits,train_size=Split.Defaults.train_size,test_size=Split.Defaults.test_size,random_state=Split.Defaults.random_state):
+        parent = self._given_indices_parent_folder
+        train_file = os.path.join(parent,self._given_indices_file.split('/')[-1])
+        train_csv = pd.read_csv(train_file,names=['path','id','cat','full'])
+        all_values = list(cross_validation_values['presentation'].values)
+        all_values = [a[0] for a in all_values]
+        train_ids = list(train_csv['id'])
+        both_train = set(all_values).intersection(train_ids)
+        indices_train = [all_values.index(x) for x in both_train]
+        data_shape = np.zeros(len(both_train))
+        _split = StratifiedShuffleSplit(n_splits=n_splits, train_size=train_size, test_size=test_size, random_state=random_state)
+        args = [self.assembly[self._stratification_coord].values[indices_train]]
+        splits = _split.split(data_shape,*args)
+        
+        return  list(splits)
+        
         
     def _build_splits_file(self,cross_validation_values):
         parent = self._given_indices_parent_folder
@@ -332,18 +352,19 @@ class CrossValidation(Transformation):
             assert sorted(source_assembly[self._stratification_coord].values) == \
                    sorted(target_assembly[self._stratification_coord].values)
                    
-        
+        self.assembly = target_assembly
         cross_validation_values, splits = self._split.build_splits(target_assembly)
-        
-        if self._given_indices_file and self._given_indices_parent_folder:
+        #import pdb;pdb.set_trace()
+        if self._given_indices_file and self._given_indices_parent_folder and not self._one_given_file:
             splits = self._build_splits_file(cross_validation_values)
-        
+        if self._given_indices_file and self._given_indices_parent_folder and self._one_given_file:
+            splits = self._build_splits_one_file(cross_validation_values)
         split_scores = []
         
         
         for split_iterator, (train_indices, test_indices), done \
                 in tqdm(enumerate_done(splits), total=len(splits), desc='cross-validation'):
-            
+            #import pdb;pdb.set_trace()
             train_values, test_values = cross_validation_values[train_indices], cross_validation_values[test_indices]
             train_source = subset(source_assembly, train_values, dims_must_match=False)
             train_target = subset(target_assembly, train_values, dims_must_match=False)
